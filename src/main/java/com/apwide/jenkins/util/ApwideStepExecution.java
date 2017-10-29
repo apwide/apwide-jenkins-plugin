@@ -1,7 +1,7 @@
 package com.apwide.jenkins.util;
 
-import static org.thoughtslive.jenkins.plugins.jira.util.Common.buildErrorResponse;
-import static org.thoughtslive.jenkins.plugins.jira.util.Common.log;
+import static com.apwide.jenkins.api.ResponseHandler.buildErrorResponse;
+import static com.apwide.jenkins.util.ApwideCommon.log;
 import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.model.TaskListener;
@@ -10,15 +10,12 @@ import hudson.model.Run;
 import java.io.IOException;
 
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.thoughtslive.jenkins.plugins.jira.api.ResponseData;
-import org.thoughtslive.jenkins.plugins.jira.steps.BasicJiraStep;
 import org.thoughtslive.jenkins.plugins.jira.util.JiraStepExecution;
 
-import retrofit2.Response;
-
+import com.apwide.jenkins.api.ResponseData;
 import com.apwide.jenkins.service.ApwideService;
 
-public abstract class ApwideStepExecution<T> extends JiraStepExecution<T> {
+public abstract class ApwideStepExecution<T, S extends ApwideJiraStep> extends JiraStepExecution<T> {
 
     private static final long serialVersionUID = -4495525306914574228L;
 
@@ -28,54 +25,123 @@ public abstract class ApwideStepExecution<T> extends JiraStepExecution<T> {
     private transient TaskListener listener;
     private transient EnvVars envVars;
 
-    protected ApwideStepExecution(StepContext context) throws IOException, InterruptedException {
+    protected final S step;
+
+    protected ApwideStepExecution(StepContext context, S step) throws IOException, InterruptedException {
 	super(context);
 	run = context.get(Run.class);
 	listener = context.get(TaskListener.class);
 	envVars = context.get(EnvVars.class);
+	logger = listener.getLogger();
+	this.step = step;
     }
 
-    private <T> ResponseData<T> runtimeException(String message) {
+    protected ResponseData<T> runtimeException(String message) {
 	return buildErrorResponse(new RuntimeException(message));
     }
 
-    /**
-     * Verifies the common input for all the stesp.
-     * 
-     * @param step
-     * @return response if JIRA_SITE is empty or if there is no site configured
-     *         with JIRA_SITE.
-     * @throws AbortException
-     *             when failOnError is true and JIRA_SITE is missing.
-     */
-    @SuppressWarnings("hiding")
-    protected <T> ResponseData<T> verifyCommon(final BasicJiraStep step) throws AbortException {
-	super.verifyCommon(step);
+    protected ResponseData<T> verifyCommon(final S step) throws AbortException {
+	org.thoughtslive.jenkins.plugins.jira.api.ResponseData<T> responseDataOrig = super.verifyCommon(step);
+	ResponseData<T> response = ResponseData.toResponseData(responseDataOrig);
 
-	logger = listener.getLogger();
+	if (response != null && !response.isSuccessful()) {
+	    return response;
+	}
 
 	final ApwideSite site = ApwideSite.get(siteName);
 
 	if (site == null) {
-	    return runtimeException("No APWIDE JIRA site configured with " + siteName + " name.");
+	    return raiseError(runtimeException("No APWIDE JIRA site configured with " + siteName + " name."));
 	} else {
 
 	    if (apwideService == null)
 		apwideService = site.getApwideService();
 
 	    if (apwideService == null)
-		runtimeException("Problem during initialization of APWIDE service. Site name:" + siteName);
+		return runtimeException("Problem during initialization of APWIDE service. Site name:" + siteName);
 
 	    buildUser = prepareBuildUser(run.getCauses());
 	    buildUrl = envVars.get("BUILD_URL");
 
-	    return null;
+	    return success();
 	}
     }
 
     @Override
-    protected <T> ResponseData<T> logResponse(ResponseData<T> response) throws AbortException {
-	return ApwideResponseHandler.logResponse(response, logger, failOnError);
+    protected ResponseData<T> verifyInput() throws Exception {
+
+	ResponseData<T> response = verifyCommon(step);
+
+	if (!response.isSuccessful()) {
+	    return raiseError(response);
+	}
+
+	try {
+
+	    response = checkParams();
+
+	    if (!response.isSuccessful())
+		return raiseError(response);
+	    else
+		return response;
+
+	} catch (Exception e) {
+	    return raiseError(buildErrorResponse(e));
+	}
+
+    }
+
+    protected abstract ResponseData<T> execute();
+
+    @Override
+    public T run() throws Exception {
+
+	ResponseData<T> response = verifyInput();
+
+	if (response.isSuccessful()) {
+	    log(logger, "APWIDE: Jira Site - " + siteName + " - Updating environment status: " + step);
+	    try {
+		response = execute();
+	    } catch (Exception e) {
+		response = buildErrorResponse(e);
+		raiseError(response);
+	    }
+	}
+
+	logResponse(response);
+
+	if (!response.isSuccessful()) {
+	    raiseError(response);
+	    return response.getData();
+	}
+
+	return response.getData();
+    }
+
+    private ResponseData<T> raiseError(ResponseData<T> response) throws AbortException {
+	if (failOnError)
+	    throw new AbortException(response.getError());
+	else
+	    return response;
+    }
+
+    protected abstract ResponseData<T> checkParams() throws Exception;
+
+    private void logResponse(ResponseData<T> response) throws AbortException {
+	if (response.isSuccessful()) {
+	    log(logger, "Successful. Code: " + response.getCode());
+	} else {
+	    log(logger, "Error Code: " + response.getCode());
+	    log(logger, "Error Message: " + response.getError());
+	}
+    }
+
+    protected ResponseData<T> success(T data) {
+	return new ResponseData<T>(true, 200, "Success", null, data);
+    }
+
+    protected ResponseData<T> success() {
+	return new ResponseData<T>(true, 200, "Success", null, null);
     }
 
 }

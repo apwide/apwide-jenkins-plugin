@@ -1,5 +1,6 @@
 package com.apwide.jenkins.steps;
 
+import static com.apwide.jenkins.api.ResponseData.toResponseData;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Matchers.any;
@@ -8,6 +9,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import hudson.AbortException;
+import hudson.EnvVars;
+import hudson.model.TaskListener;
+import hudson.model.Run;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -22,23 +27,12 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.thoughtslive.jenkins.plugins.jira.Site;
-import org.thoughtslive.jenkins.plugins.jira.api.ResponseData;
 import org.thoughtslive.jenkins.plugins.jira.api.ResponseData.ResponseDataBuilder;
 
+import com.apwide.jenkins.api.ResponseData;
 import com.apwide.jenkins.service.ApwideService;
 import com.apwide.jenkins.util.ApwideSite;
 
-import hudson.AbortException;
-import hudson.EnvVars;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-
-/**
- * Unit test cases for EditCommentStep class.
- * 
- * @author Naresh Rayapati
- *
- */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ EditEnvironmentStatusStep.class, Site.class, ApwideSite.class })
 public class EditEnvironmentStatusStepTest {
@@ -68,17 +62,18 @@ public class EditEnvironmentStatusStepTest {
 	when(envVarsMock.get("BUILD_URL")).thenReturn("http://localhost:8080/jira-testing/job/01");
 
 	PowerMockito.mockStatic(Site.class);
+	Mockito.when(Site.get("LOCAL")).thenReturn(siteMock);
 	PowerMockito.mockStatic(ApwideSite.class);
-	Mockito.when(ApwideSite.get(any())).thenReturn(apwideSiteMock);
+	Mockito.when(ApwideSite.get("LOCAL")).thenReturn(apwideSiteMock);
 	when(apwideSiteMock.getApwideService()).thenReturn(apwideServiceMock);
 
 	when(runMock.getCauses()).thenReturn(null);
 	when(taskListenerMock.getLogger()).thenReturn(printStreamMock);
 	doNothing().when(printStreamMock).println();
 
-	final ResponseDataBuilder<Object> builder = ResponseData.builder();
+	final ResponseDataBuilder<Void> builder = ResponseData.builder();
 	when(apwideServiceMock.updateEnvironmentStatus(anyString(), anyString(), anyString(), anyString())).thenReturn(
-		builder.successful(true).code(200).message("Success").build());
+		toResponseData(builder.successful(true).code(200).message("Success").build()));
 
 	when(contextMock.get(Run.class)).thenReturn(runMock);
 	when(contextMock.get(TaskListener.class)).thenReturn(taskListenerMock);
@@ -118,16 +113,16 @@ public class EditEnvironmentStatusStepTest {
 	stepExecution.run();
 	verify(apwideServiceMock, times(1)).updateEnvironmentStatus("eCommerce", "Staging", "", null);
 	assertThat(step.isFailOnError()).isEqualTo(true);
-	
-	final ResponseDataBuilder<Object> builder = ResponseData.builder();
+
+	final ResponseDataBuilder<Void> builder = ResponseData.builder();
 	when(apwideServiceMock.updateEnvironmentStatus(anyString(), anyString(), anyString(), anyString())).thenReturn(
-		builder.successful(true).code(302).message("Not Modified").build());
-	
+		toResponseData(builder.successful(true).code(302).message("Not Modified").build()));
+
 	step = new EditEnvironmentStatusStep("eCommerce", "Staging", "", null);
 	stepExecution = new EditEnvironmentStatusStep.Execution(step, contextMock);
 	stepExecution.run();
 	verify(apwideServiceMock, times(2)).updateEnvironmentStatus("eCommerce", "Staging", "", null);
 	assertThat(step.isFailOnError()).isEqualTo(true);
-	
+
     }
 }

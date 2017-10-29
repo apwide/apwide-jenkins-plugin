@@ -1,7 +1,6 @@
 package com.apwide.jenkins.steps;
 
 import static com.apwide.jenkins.util.ApwideStepChecker.checkNotNull;
-import static org.thoughtslive.jenkins.plugins.jira.util.Common.buildErrorResponse;
 import hudson.Extension;
 
 import java.io.IOException;
@@ -12,21 +11,14 @@ import lombok.ToString;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.thoughtslive.jenkins.plugins.jira.api.ResponseData;
-import org.thoughtslive.jenkins.plugins.jira.steps.BasicJiraStep;
-import org.thoughtslive.jenkins.plugins.jira.util.JiraStepDescriptorImpl;
 
-import static org.thoughtslive.jenkins.plugins.jira.util.Common.log;
+import com.apwide.jenkins.api.ResponseData;
+import com.apwide.jenkins.util.ApwideJiraStep;
+import com.apwide.jenkins.util.ApwideStepDescriptorImpl;
 import com.apwide.jenkins.util.ApwideStepExecution;
 
-/**
- * Step to update given JIRA issue.
- * 
- * @author Naresh Rayapati
- *
- */
 @ToString(of = { "applicationName", "categoryName", "statusName", "statusId" })
-public class EditEnvironmentStatusStep extends BasicJiraStep {
+public class EditEnvironmentStatusStep extends ApwideJiraStep {
 
     private static final long serialVersionUID = -5047755533376456765L;
 
@@ -51,7 +43,7 @@ public class EditEnvironmentStatusStep extends BasicJiraStep {
     }
 
     @Extension
-    public static class DescriptorImpl extends JiraStepDescriptorImpl {
+    public static class DescriptorImpl extends ApwideStepDescriptorImpl {
 
 	@Override
 	public String getFunctionName() {
@@ -69,49 +61,26 @@ public class EditEnvironmentStatusStep extends BasicJiraStep {
 	}
     }
 
-    public static class Execution extends ApwideStepExecution<ResponseData<Object>> {
+    public static class Execution extends ApwideStepExecution<Void, EditEnvironmentStatusStep> {
 
 	private static final long serialVersionUID = -4127725325057889625L;
 
-	private final EditEnvironmentStatusStep step;
-
 	protected Execution(final EditEnvironmentStatusStep step, final StepContext context) throws IOException, InterruptedException {
-	    super(context);
-	    this.step = step;
+	    super(context, step);
 	}
 
 	@Override
-	protected ResponseData<Object> run() throws Exception {
-
-	    ResponseData<Object> response = verifyInput();
-
-	    if (response == null) {
-		log(logger, "APWIDE: Jira Site - " + siteName + " - Updating environment status: " + step);
-		response = apwideService.updateEnvironmentStatus(step.getApplicationName(), step.getCategoryName(), step.getStatusId(),
-			step.getStatusName());
-	    }
-
-	    return logResponse(response);
+	protected ResponseData<Void> checkParams() throws Exception {
+	    checkNotNull(step.getApplicationName(), "applicationName");
+	    checkNotNull(step.getCategoryName(), "categoryName");
+	    return success();
 	}
 
 	@Override
-	protected <T> ResponseData<T> verifyInput() throws Exception {
-
-	    ResponseData<T> errorResponse = verifyCommon(step);
-
-	    if (errorResponse != null)
-		return errorResponse;
-
-	    try {
-
-		checkNotNull(step.getApplicationName(), "applicationName");
-		checkNotNull(step.getCategoryName(), "categoryName");
-		return null;
-
-	    } catch (Exception e) {
-		return logResponse(buildErrorResponse(e));
-	    }
+	protected ResponseData<Void> execute() {
+	    return apwideService.updateEnvironmentStatus(step.getApplicationName(), step.getCategoryName(), step.getStatusId(), step.getStatusName());
 	}
+
     }
 
     @Override

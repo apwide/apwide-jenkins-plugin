@@ -10,6 +10,6 @@ import retrofit2.http.Query;
 public interface ApwideEndPoints {
 
     @PUT("rest/apwide/tem/1.1/status-change")
-    Call<Object> updateStatus(@Query("application") String applicationName, @Query("category") String categoryName, @Body EnvironmentStatus status);
+    Call<Void> updateStatus(@Query("application") String applicationName, @Query("category") String categoryName, @Body EnvironmentStatus status);
 
 }
