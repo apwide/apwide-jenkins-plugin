@@ -1,32 +1,19 @@
-= JIRA Pipeline Steps
+= Apwide for JIRA + Jenkins
 
-image::images/JiraSteps.png[JIRA Steps,300]
+image:https://img.shields.io/badge/License-Apache%202.0-blue.svg[License]
 
-link:https://ci.jenkins.io/job/Plugins/job/jira-steps-plugin/job/master/[image:https://ci.jenkins.io/job/Plugins/job/jira-steps-plugin/job/master/badge/icon[Build]] image:https://img.shields.io/badge/License-Apache%202.0-blue.svg[License] link:https://plugins.jenkins.io/jira-steps[image:https://img.shields.io/badge/JIRA%20Steps-WIKI-blue.svg[Wiki]]
+https://jenkins.io/[Jenkins] plugin to automate https://marketplace.atlassian.com/plugins/com.holydev.env.plugin.jira-holydev-env-plugin/server/overview[Test Environment and Release Management in JIRA]
 
-`Jira-steps-plugin` is an open source `Jenkins Pipeline Steps` plugin. This offers Pipeline-compatible Jira steps.
+https://apwide.com/documentation[Apwide documentation]
 
-Documentation for this plugin is at https://jenkinsci.github.io/jira-steps-plugin[Jira Steps].
-
-Quick links:
-
-* https://jenkinsci.github.io/jira-steps-plugin/index.html[Get Started]
-* https://jenkinsci.github.io/jira-steps-plugin/install.html[Installation]
-* https://jenkinsci.github.io/jira-steps-plugin/config.html[Configuration]
-* https://jenkinsci.github.io/jira-steps-plugin/jira_get_component.html[Pipeline Steps]
-* https://jenkinsci.github.io/jira-steps-plugin/contributing.html[Contribution]
-* https://jenkinsci.github.io/jira-steps-plugin/release_notes.html[Release Notes]
 
 == Maintainers
 
-* https://github.com/nrayapati[Naresh Rayapati]
+* https://github.com/apwide[Apwide]
 
 == Disclaimer
 
-Please don't hesitate to log a http://issues.jenkins-ci.org/secure/IssueNavigator.jspa?mode=hide&reset=true&jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27jira-steps-plugin%27[JIRA] or github pull request if you need any help or if you can be of help with this plugin :).
-Refer to the https://jenkinsci.github.io/jira-steps-plugin/contributing.html[contribution guide] for more information.
-
-Developed by https://github.com/nrayapati[Naresh Rayapati], this repo was initially cloned from https://github.com/ThoughtsLive/jira-steps[ThoughtsLive]
+Developed by https://github.com/apwide[Apwide], this plugin is an extension of https://github.com/jenkinsci/jira-steps-plugin[JIRA Pipeline Steps Plugin]
 
 == License
 -------
