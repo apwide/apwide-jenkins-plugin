@@ -1,14 +1,10 @@
 package com.apwide.jenkins.steps;
 
-import static com.apwide.jenkins.api.ResponseData.toResponseData;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import hudson.AbortException;
 import hudson.EnvVars;
-import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.model.Run;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -22,15 +18,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.thoughtslive.jenkins.plugins.jira.Site;
-import org.thoughtslive.jenkins.plugins.jira.api.ResponseData.ResponseDataBuilder;
 
-import com.apwide.jenkins.api.ResponseData;
 import com.apwide.jenkins.service.ApwideService;
 import com.apwide.jenkins.util.ApwideSite;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Site.class, ApwideSite.class })
-public class BaseStepTest {
+@PrepareForTest({ Site.class, ApwideSite.class })
+public abstract class BaseStepTest {
 
     @Mock
     protected TaskListener taskListenerMock;
@@ -48,7 +42,7 @@ public class BaseStepTest {
     protected ApwideSite apwideSiteMock;
     @Mock
     protected StepContext contextMock;
-    
+
     @Before
     public void setup() throws IOException, InterruptedException {
 
@@ -70,9 +64,9 @@ public class BaseStepTest {
 	when(contextMock.get(TaskListener.class)).thenReturn(taskListenerMock);
 	when(contextMock.get(EnvVars.class)).thenReturn(envVarsMock);
     }
-    
-    protected void setFailOnError(boolean failOnError){
-	when(envVarsMock.get("JIRA_FAIL_ON_ERROR")).thenReturn(failOnError+"");
+
+    protected void setFailOnError(boolean failOnError) {
+	when(envVarsMock.get("JIRA_FAIL_ON_ERROR")).thenReturn(failOnError + "");
     }
-    
+
 }

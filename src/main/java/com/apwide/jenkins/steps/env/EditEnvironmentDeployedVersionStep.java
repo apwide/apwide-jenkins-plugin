@@ -1,4 +1,4 @@
-package com.apwide.jenkins.steps;
+package com.apwide.jenkins.steps.env;
 
 import static com.apwide.jenkins.util.ApwideStepChecker.checkNotNull;
 import hudson.Extension;
@@ -16,8 +16,8 @@ import com.apwide.jenkins.util.ApwideJiraStep;
 import com.apwide.jenkins.util.ApwideStepDescriptorImpl;
 import com.apwide.jenkins.util.ApwideStepExecution;
 
-@ToString(of = { "applicationName", "categoryName", "statusName", "statusId" })
-public class EditEnvironmentStatusStep extends ApwideJiraStep {
+@ToString(of = { "applicationName", "categoryName", "versionName" })
+public class EditEnvironmentDeployedVersionStep extends ApwideJiraStep {
 
     private static final long serialVersionUID = -5047755533376456765L;
 
@@ -28,17 +28,14 @@ public class EditEnvironmentStatusStep extends ApwideJiraStep {
     private final String categoryName;
 
     @Getter
-    private final String statusName;
+    private final String versionName;
 
-    @Getter
-    private final String statusId;
 
     @DataBoundConstructor
-    public EditEnvironmentStatusStep(final String applicationName, final String categoryName, final String statusId, final String statusName) {
+    public EditEnvironmentDeployedVersionStep(final String applicationName, final String categoryName, final String versionName) {
 	this.applicationName = applicationName;
 	this.categoryName = categoryName;
-	this.statusName = statusName;
-	this.statusId = statusId;
+	this.versionName = versionName;
     }
 
     @Extension
@@ -46,12 +43,12 @@ public class EditEnvironmentStatusStep extends ApwideJiraStep {
 
 	@Override
 	public String getFunctionName() {
-	    return "apwideUpdateEnvironmentStatus";
+	    return "apwideUpdateEnvironmentDeployedVersion";
 	}
 
 	@Override
 	public String getDisplayName() {
-	    return getPrefix() + "Update Environment Status";
+	    return getPrefix() + "Update Environment Deployed Version";
 	}
 
 	@Override
@@ -60,11 +57,11 @@ public class EditEnvironmentStatusStep extends ApwideJiraStep {
 	}
     }
 
-    public static class Execution extends ApwideStepExecution<Void, EditEnvironmentStatusStep> {
+    public static class Execution extends ApwideStepExecution<Void, EditEnvironmentDeployedVersionStep> {
 
 	private static final long serialVersionUID = -4127725325057889625L;
 
-	protected Execution(final EditEnvironmentStatusStep step, final StepContext context) throws IOException, InterruptedException {
+	protected Execution(final EditEnvironmentDeployedVersionStep step, final StepContext context) throws IOException, InterruptedException {
 	    super(context, step);
 	}
 
@@ -77,7 +74,7 @@ public class EditEnvironmentStatusStep extends ApwideJiraStep {
 
 	@Override
 	protected ResponseData<Void> execute() {
-	    return apwideService.updateEnvironmentStatus(step.getApplicationName(), step.getCategoryName(), step.getStatusId(), step.getStatusName());
+	    return apwideService.updateEnvironmentDeployedVersion(step.getApplicationName(), step.getCategoryName(), step.getVersionName());
 	}
 
     }

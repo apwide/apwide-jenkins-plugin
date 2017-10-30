@@ -15,6 +15,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import com.apwide.jenkins.api.DeployedVersion;
 import com.apwide.jenkins.api.EnvironmentStatus;
 import com.apwide.jenkins.api.ResponseData;
 import com.apwide.jenkins.api.ResponseHandler;
@@ -45,6 +46,16 @@ public class ApwideService {
 	try {
 	    EnvironmentStatus status = new EnvironmentStatus(statusId, statusName);
 	    Response<Void> resp = rest.updateStatus(applicationName, categoryName, status).execute();
+	    return ResponseHandler.parseResponse(resp);
+	} catch (Exception e) {
+	    return buildErrorResponse(e);
+	}
+    }
+
+    public ResponseData<Void> updateEnvironmentDeployedVersion(String applicationName, String categoryName, String versionName) {
+	try {
+	    DeployedVersion deployedVersion = new DeployedVersion(versionName);
+	    Response<Void> resp = rest.updateDeployedVersion(applicationName, categoryName, deployedVersion).execute();
 	    return ResponseHandler.parseResponse(resp);
 	} catch (Exception e) {
 	    return buildErrorResponse(e);
