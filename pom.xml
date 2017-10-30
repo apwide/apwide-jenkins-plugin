@@ -9,8 +9,8 @@
   <artifactId>apwide-jira</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
-  <name>Apwide for Jira</name>
-  <description>Integrate Apwide apps for JIRA with Jenkins</description>
+  <name>Apwide Jira Plugin</name>
+  <description>Integrate Apwide apps for JIRA with Jenkins pipelines</description>
   <inceptionYear>2017</inceptionYear>
   <url>https://github.com/guvial/apwide-jenkins-plugin</url>
   <properties>
