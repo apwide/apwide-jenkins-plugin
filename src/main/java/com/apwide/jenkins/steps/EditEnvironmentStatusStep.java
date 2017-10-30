@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.ToString;
 
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.apwide.jenkins.api.ResponseData;
@@ -84,7 +83,8 @@ public class EditEnvironmentStatusStep extends ApwideJiraStep {
     }
 
     @Override
-    public StepExecution start(StepContext context) throws Exception {
+    public Execution start(StepContext context) throws Exception {
 	return new Execution(this, context);
     }
+
 }
