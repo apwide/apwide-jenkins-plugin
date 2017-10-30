@@ -13,7 +13,7 @@ https://apwide.com/documentation[Apwide documentation]
 
 == Disclaimer
 
-Developed by https://github.com/guvial[Guillaume Vial], this plugin depends on https://github.com/jenkinsci/jira-steps-plugin[JIRA Pipeline Steps Plugin]
+Developed by https://github.com/guvial[Guillaume Vial], this plugin is an extension of https://github.com/jenkinsci/jira-steps-plugin[JIRA Pipeline Steps Plugin]
 
 == License
 -------
